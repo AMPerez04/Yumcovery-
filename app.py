@@ -15,10 +15,9 @@ def create_user():
     sex = Sex[request.form['sex']]
     height = int(request.form['height'])
     weight = int(request.form['weight'])
-    activity = request.form['activity']
     goal = Goal[request.form['goal']]
     # get form data
-    store_user(User(name, dob, sex, height, weight, activity, goal))
+    store_user(User(name, dob, sex, height, weight, goal))
     # response showing success
     return 'User created successfully'
 

@@ -58,7 +58,6 @@ class User:
     sex: Sex
     height: int  # inches
     weight: int
-    activity: str
     goal: Goal
 
 
