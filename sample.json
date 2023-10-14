@@ -22,11 +22,11 @@
         "vigorous_intensity_seconds": null
       },
       "calories_data": {
-        "BMR_calories": 1461.820989602347,
+        "BMR_calories": 1461.820989602347, //HERE
         "calorie_samples": [],
-        "net_activity_calories": 342.36193334967925,
+        "net_activity_calories": 342.36193334967925, //HERE
         "net_intake_calories": null,
-        "total_burned_calories": 444.368244582165
+        "total_burned_calories": 444.368244582165 //HERE
       },
       "device_data": {
         "activation_timestamp": null,
