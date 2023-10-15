@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime, date, timedelta
 
 from flask import Flask, request, render_template
@@ -7,7 +8,7 @@ from mongoHandler import store_user, get_activity, get_user
 
 app = Flask(__name__)
 
-queue_cache = dict()
+queue_cache = defaultdict(dict)
 
 
 @app.route("/createUser", methods=["GET"])
@@ -31,27 +32,35 @@ def create_user():
 
 @app.route("/meal")
 def get_meal():
-    user_id = request.query_string["user_id"]
+    user_id = request.args.get("user_id")
+
+    nutritionists_suggestions(user_id)  # we will return from here
+
+
+def nutritionists_suggestions(user_id):
     queue_cache[user_id]["user_data"] = get_user(user_id)
     queue_cache[user_id]["activity"] = get_activity(user_id)
-
     caloric_goal = calc_calorie_intake_target(user_id)
-    physical_activity_level = physical_activity_level(caloric_goal, user_id)
-
+    level = physical_activity_level(user_id)
+    protein, fat, carbs = get_macros(caloric_goal, queue_cache[user_id]["user_data"]["weight"], level)
+    # Create a funciton that takes into account of the user's goal and activity level and adjust accoridng
+    # to their goal. Maintain: only suggested
+    # bulk: at least
+    # cut: at most
+    print(protein, fat, carbs)
     del queue_cache[user_id]
-    pass
 
 
 def physical_activity_level(user_id):
     # intense excersing minutes
-    intense_excercising_minutes = queue_cache[user_id]["activity"]
+    intense_excercising_minutes = queue_cache[user_id]["activity"] # TODO: actually access intense excersing minutes
     if intense_excercising_minutes == 0:
         return 1
-    elif intense_excercising_minutes > 0 and intense_excercising_minutes <= 15:
+    elif 0 < intense_excercising_minutes <= 15:
         return 2
-    elif intense_excercising_minutes > 15 and intense_excercising_minutes <= 30:
+    elif 15 < intense_excercising_minutes <= 30:
         return 3
-    elif intense_excercising_minutes > 30 and intense_excercising_minutes <= 45:
+    elif 30 < intense_excercising_minutes <= 45:
         return 4
     else:
         return 5
@@ -76,8 +85,8 @@ def get_macros(calorie_goal, weight_in_kg, pa):
 def calc_calorie_intake_target(user_id: str):
     CALORIE_ADJUSTMENT = 500
 
-    activity = queue_cache[user_id]["user_data"]
-    user_data = queue_cache[user_id]["activity"]
+    user_data = queue_cache[user_id]["user_data"]
+    activity = queue_cache[user_id]["activity"]
 
     data = activity["data"][0]
     meta = data["metadata"]
@@ -110,16 +119,16 @@ def timed_calories_to_total(calories, start_time: datetime, end_time: datetime):
         if next_hour_start > end_time:  # if fractional hour, calculate fraction of hour
             fraction_of_hour = (end_time - current_time).seconds / 3600
             total += (
-                fraction_of_hour
-                * cumulative_calorie_expenditure_over_time[current_time.hour]
+                    fraction_of_hour
+                    * cumulative_calorie_expenditure_over_time[current_time.hour]
             )
             break
 
         # before next hour, calculate fraction of hour
         fraction_of_hour = (next_hour_start - current_time).seconds / 3600
         total += (
-            fraction_of_hour
-            * cumulative_calorie_expenditure_over_time[current_time.hour]
+                fraction_of_hour
+                * cumulative_calorie_expenditure_over_time[current_time.hour]
         )
 
         current_time = next_hour_start
