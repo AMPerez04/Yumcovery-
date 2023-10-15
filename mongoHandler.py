@@ -15,12 +15,13 @@ def store_user(user: User):  # store user in db
     pprint(client.UserHealthData.UserInfo.update_one({"name": user.name}, {"$set": user.__dict__}, upsert=True))
 
 
-def get_activity(user: User):
-    return client.UserHealthData.WearableData.find_one({"user.user_id": user.name})
+def get_activity(user_id: str):
+    return client.UserHealthData.WearableData.find_one({"user.user_id": user_id})
 
 
 def store_activity(activity):
     pprint(client.UserHealthData.WearableData.insert_one(activity))
 
 
-pprint(get_activity(User("davidteju", 0, 0, 0, 0, 0)))
+def get_user(user_id: str):
+    return client.UserHealthData.UserInfo.find_one({"name": user_id})
