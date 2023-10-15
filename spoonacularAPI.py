@@ -1,4 +1,5 @@
 import requests
+import random
 import json
 api_key = '9352cf695fe2426f89998c232f7fc973'
 
@@ -19,7 +20,9 @@ def get_menu_items(query, calorie_limit):
 
 def get_recipe(minCalories, minProtein, minCarbs, minFat, maxCalories, number):
     url = 'https://api.spoonacular.com/recipes/complexSearch'
-    url_with_params = f'{url}?apiKey={api_key}&minCalories={minCalories}&minProtein={minProtein}&minCarbs={minCarbs}&minFat={minFat}&maxCalories={maxCalories}&intstructionsRequired=TRUE&number={number}'
+    offset = int(random.random() * 100)
+    url_with_params = f'{url}?apiKey={api_key}&minCalories={minCalories}&minProtein={minProtein}&minCarbs={minCarbs}&minFat={minFat}&maxCalories={maxCalories}&intstructionsRequired=TRUE&number={number}&offset={offset}'
+
 
     response = requests.get(url_with_params)
     if response.status_code == 200:
