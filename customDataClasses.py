@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
 from datetime import date
-from pprint import pprint
 
 cumulative_calorie_expenditure_over_time = [0.038,
                                             0.037,
