@@ -25,9 +25,9 @@ def get_recipe(minProtein = 0, maxProtein = sys.maxsize, minFat = 0, maxFat = sy
     offset = int(random.random() * 100)
     url_with_params = f'{url}?apiKey={api_key}&minCalories={minCalories}&maxProtein={maxProtein}&minProtein={minProtein}&maxCarbs={maxCarbs}&minCarbs={minCarbs}&maxFat={maxFat}&minFat={minFat}&maxCalories={maxCalories}&intstructionsRequired=TRUE&offset={offset}&number=1'
 
-    response = requests.get(url_with_params)
-    if response.status_code == 200:
-        recipe = response.json()
+    name = requests.get(url_with_params)
+    if name.status_code == 200:
+        recipe = name.json()
     else:
         # print(f'Failed to retrieve menu items: {response.status_code}')
         return None
@@ -38,12 +38,12 @@ def get_recipe(minProtein = 0, maxProtein = sys.maxsize, minFat = 0, maxFat = sy
     url = f'https://api.spoonacular.com/recipes/{id}/ingredientWidget.json?apiKey={api_key}'
     url2 = f'https://api.spoonacular.com/recipes/{id}/analyzedInstructions?apiKey={api_key}'
     url3 = f'https://api.spoonacular.com/food/menuItems/{id}/nutritionLabel.png?apiKey={api_key}'
-    response3 = requests.get(url)
-    response2 = requests.get(url2)
+    ingredients = requests.get(url)
+    instructions = requests.get(url2)
     nutLabel = requests.get(url3)
-    if (response3.status_code == 200) and (response2.status_code == 200):
-        recipe_ingredients = response3.json()
-        recipe_instructions = response2.json()
+    if (ingredients.status_code == 200) and (instructions.status_code == 200):
+        recipe_ingredients = ingredients.json()
+        recipe_instructions = instructions.json()
 
         # if recipe_ingredients and recipe_instructions:
         #     print()
@@ -61,9 +61,9 @@ def get_recipe(minProtein = 0, maxProtein = sys.maxsize, minFat = 0, maxFat = sy
         #         print(f'{item["number"]}. {item["step"]}')
 
     response_dict = {
-        'response': response,
-        'response3': response3,
-        'response2': response2
+        'name': name,
+        'ingredients': ingredients,
+        'instructions': instructions
     }
 
     return response_dict
