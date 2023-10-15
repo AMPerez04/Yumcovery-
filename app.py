@@ -15,6 +15,10 @@ queue_cache = defaultdict(dict)
 def create_user_form():
     return render_template("createUser.html")
 
+@app.route("/dashboard", methods=["GET"])
+def create_dashboard():
+    return render_template("dashboard.html")
+
 
 @app.route("/createUser", methods=["POST"])
 def create_user():
