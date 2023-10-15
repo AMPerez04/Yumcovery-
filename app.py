@@ -42,7 +42,8 @@ def nutritionists_suggestions(user_id):
     queue_cache[user_id]["activity"] = get_activity(user_id)
     caloric_goal = calc_calorie_intake_target(user_id)
     level = physical_activity_level(user_id)
-    protein, fat, carbs = get_macros(caloric_goal, queue_cache[user_id]["user_data"]["weight"], level)
+    protein, fat, carbs = get_macros(
+        caloric_goal, queue_cache[user_id]["user_data"]["weight"], level)
     # Create a funciton that takes into account of the user's goal and activity level and adjust accoridng
     # to their goal. Maintain: only suggested
     # bulk: at least
@@ -53,7 +54,10 @@ def nutritionists_suggestions(user_id):
 
 def physical_activity_level(user_id):
     # intense excersing minutes
-    intense_excercising_minutes = queue_cache[user_id]["activity"] # TODO: actually access intense excersing minutes
+    intense_excercising_seconds = queue_cache[user_id]["activity"][
+        "data"][0]["active_durations_data"]["activity_seconds"]
+    intense_excercising_minutes = intense_excercising_seconds / 60
+
     if intense_excercising_minutes == 0:
         return 1
     elif 0 < intense_excercising_minutes <= 15:
@@ -119,16 +123,16 @@ def timed_calories_to_total(calories, start_time: datetime, end_time: datetime):
         if next_hour_start > end_time:  # if fractional hour, calculate fraction of hour
             fraction_of_hour = (end_time - current_time).seconds / 3600
             total += (
-                    fraction_of_hour
-                    * cumulative_calorie_expenditure_over_time[current_time.hour]
+                fraction_of_hour
+                * cumulative_calorie_expenditure_over_time[current_time.hour]
             )
             break
 
         # before next hour, calculate fraction of hour
         fraction_of_hour = (next_hour_start - current_time).seconds / 3600
         total += (
-                fraction_of_hour
-                * cumulative_calorie_expenditure_over_time[current_time.hour]
+            fraction_of_hour
+            * cumulative_calorie_expenditure_over_time[current_time.hour]
         )
 
         current_time = next_hour_start
