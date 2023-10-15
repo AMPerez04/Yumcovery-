@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 
 from flask import Flask, request, render_template
 from customDataClasses import Sex, Goal, User, cumulative_calorie_expenditure_over_time
+from spoonacularAPI import get_recipe
 
 from mongoHandler import store_user, get_activity, get_user
 
@@ -52,14 +53,11 @@ def nutritionists_suggestions(user_id):
     user_goal = queue_cache[user_id]["user_data"].goal  # user goal
     # no print statements
     if (user_goal == Goal.cut):
-        print(
-            f" One should take at most {protein} grams of protein, {fat} grams of fat, and {carbs} grams of carbs, give or take 5 grams.")
+        recipe = get_recipe(maxProtein=protein,maxFat=fat,maxCarbs=carbs, maxCalories=caloric_goal)
     elif (user_goal == Goal.maintain):
-        print(
-            f" One should take {protein} grams of protein, {fat} grams of fat, and {carbs} grams of carbs, give or take 5 grams.")
+        recipe = get_recipe(protein -5, protein+5, fat-3, fat+3, carbs-10, carbs+10, caloric_goal-100, caloric_goal+100)
     else:
-        print(
-            f" One should take at least {protein} grams of protein, {fat} grams of fat, and {carbs} grams of carbs, give or take 5 grams.")
+        recipe = get_recipe(minProtein=protein, minFat=fat, minCarbs=carbs, minCalories=caloric_goal)
 
     print(protein, fat, carbs)
     del queue_cache[user_id]
