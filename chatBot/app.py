@@ -12,7 +12,7 @@ def is_relevant_query(query):
     return any(keyword.lower() in query.lower() for keyword in keywords)
 
 
-@app.route("/", methods=("GET", "POST"))
+@app.route("/templates/chatBot", methods=("GET", "POST"))
 def chatBot():
     if request.method == "POST":
         query = request.form["query"]
