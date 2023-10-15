@@ -26,6 +26,28 @@ def create_user():
     # response showing success
     return 'User created successfully'
 
+def p_a_r(total_calories):
+    weight  = int(request.form['weight'])
+    #access the mongol
+    iem = 0 #intense excersing minutes
+    if (iem == 0):
+        pa = 1
+    elif (iem > 0 and iem <= 15):
+        pa = 2
+    elif (iem > 15 and iem <=30):
+        pa = 3
+    elif (iem > 30 and iem <= 45):
+        pa = 4
+    else:
+        pa = 5
+    
+    par = 0.8+((pa-1)*0.2)
+    gop = (par * weight * 4)/ total_calories#grams of protein
+    fat = (0.2*total_calories)/total_calories
+    carb = (total_calories - (gop + fat))/total_calories
+    return gop, fat, carb #returns the proportions of gop/ fat/ and carbs
+
+    
 
 def calc_calorie_intake_target(user_id: str):
     CALORIE_ADJUSTMENT = 500
