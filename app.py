@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime, date, timedelta
+from spoonacularAPI import get_recipe
 
 from flask import Flask, request, render_template
 from customDataClasses import Sex, Goal, User, cumulative_calorie_expenditure_over_time
@@ -15,6 +16,10 @@ queue_cache = defaultdict(dict)
 @app.route("/createUser", methods=["GET"])
 def create_user_form():
     return render_template("createUser.html")
+
+@app.route("/dashboard", methods=["GET"])
+def create_dashboard():
+    return render_template("dashboard.html")
 
 
 @app.route("/createUser", methods=["POST"])
