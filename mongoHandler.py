@@ -1,4 +1,3 @@
-import json
 from pprint import pprint
 
 from pymongo.mongo_client import MongoClient
