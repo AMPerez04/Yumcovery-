@@ -19,13 +19,14 @@ def create_user_form():
 @app.route("/createUser", methods=["POST"])
 def create_user():
     name = request.form["name"]
+    # need a floor function of DOB
     dob = date.fromisoformat(request.form["dob"])
     sex = Sex[request.form["sex"]]
-    height = int(request.form["height"])
-    weight = int(request.form["weight"])
+    height_inches = int(request.form["height"])  # needs to be in inches
+    weight_in_lbs = int(request.form["pounds"])  # needs to be in kilos
     goal = Goal[request.form["goal"]]
     # get form data
-    store_user(User(name, dob, sex, height, weight, goal))
+    store_user(User(name, dob, sex, height_inches, weight_in_lbs, goal))
     # response showing success
     return "User created successfully"
 
@@ -40,14 +41,26 @@ def get_meal():
 def nutritionists_suggestions(user_id):
     queue_cache[user_id]["user_data"] = get_user(user_id)
     queue_cache[user_id]["activity"] = get_activity(user_id)
+
     caloric_goal = calc_calorie_intake_target(user_id)
     level = physical_activity_level(user_id)
-    protein, fat, carbs = get_macros(
-        caloric_goal, queue_cache[user_id]["user_data"]["weight"], level)
-    # Create a funciton that takes into account of the user's goal and activity level and adjust accoridng
-    # to their goal. Maintain: only suggested
-    # bulk: at least
-    # cut: at most
+
+    lbs_to_kilos = 0.453592
+    weight_kilos = queue_cache[user_id]["user_data"]["weight"] * lbs_to_kilos
+    protein, fat, carbs = get_macros(caloric_goal, weight_kilos, level)
+
+    user_goal = queue_cache[user_id]["user_data"].goal  # user goal
+    # no print statements
+    if (user_goal == Goal.cut):
+        print(
+            f" One should take at most {protein} grams of protein, {fat} grams of fat, and {carbs} grams of carbs, give or take 5 grams.")
+    elif (user_goal == Goal.maintain):
+        print(
+            f" One should take {protein} grams of protein, {fat} grams of fat, and {carbs} grams of carbs, give or take 5 grams.")
+    else:
+        print(
+            f" One should take at least {protein} grams of protein, {fat} grams of fat, and {carbs} grams of carbs, give or take 5 grams.")
+
     print(protein, fat, carbs)
     del queue_cache[user_id]
 
@@ -70,10 +83,11 @@ def physical_activity_level(user_id):
         return 5
 
 
-def get_macros(calorie_goal, weight_in_kg, pa):
+def get_macros(calorie_goal, weight_in_kg, physical_acticvity):
     calories_per_gram = {"fat": 9, "protein": 4, "carbs": 4}
+    # the physical_activity_ratio is calculated with 0.8 grams of protein per kilo
 
-    physical_activity_ratio = 0.8 + ((pa - 1) * 0.2)
+    physical_activity_ratio = 0.8 + ((physical_acticvity - 1) * 0.2)
 
     protein = physical_activity_ratio * weight_in_kg * 4
     fat = 0.2 * calorie_goal
@@ -141,4 +155,4 @@ def timed_calories_to_total(calories, start_time: datetime, end_time: datetime):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, port=3031)

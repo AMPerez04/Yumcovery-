@@ -6,3 +6,5 @@ venv/
 .env
 .env.*
 .vscode
+node_modules
+package-lock.js
