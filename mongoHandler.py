@@ -24,3 +24,7 @@ def store_activity(activity):
 
 def get_user(user_id: str):
     return client.UserHealthData.UserInfo.find_one({"name": user_id})
+
+
+def get_nutrition_ingested(user_id: str):
+    pass

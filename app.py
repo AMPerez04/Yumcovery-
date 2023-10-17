@@ -1,12 +1,11 @@
 from collections import defaultdict
 from datetime import datetime, date, timedelta
-from spoonacularAPI import get_recipe
 
 from flask import Flask, request, render_template
 from customDataClasses import Sex, Goal, User, cumulative_calorie_expenditure_over_time
-from spoonacularAPI import get_recipe
+from spoonacularAPI import get_menu_items
 
-from mongoHandler import store_user, get_activity, get_user
+from mongoHandler import *
 
 app = Flask(__name__)
 
@@ -16,6 +15,7 @@ queue_cache = defaultdict(dict)
 @app.route("/createUser", methods=["GET"])
 def create_user_form():
     return render_template("createUser.html")
+
 
 @app.route("/dashboard", methods=["GET"])
 def create_dashboard():
@@ -45,24 +45,30 @@ def get_meal():
 
 
 def nutritionists_suggestions(user_id):
+    """
+    :param user_id: the user id of the user
+
+
+    """
     queue_cache[user_id]["user_data"] = get_user(user_id)
     queue_cache[user_id]["activity"] = get_activity(user_id)
 
     caloric_goal = calc_calorie_intake_target(user_id)
     level = physical_activity_level(user_id)
 
-    lbs_to_kilos = 0.453592
-    weight_kilos = queue_cache[user_id]["user_data"]["weight"] * lbs_to_kilos
+    kilos_per_pound = 0.453592
+    weight_kilos = queue_cache[user_id]["user_data"]["weight"] * kilos_per_pound
     protein, fat, carbs = get_macros(caloric_goal, weight_kilos, level)
 
     user_goal = queue_cache[user_id]["user_data"].goal  # user goal
     # no print statements
-    if (user_goal == Goal.cut):
-        recipe = get_recipe(maxProtein=protein,maxFat=fat,maxCarbs=carbs, maxCalories=caloric_goal)
-    elif (user_goal == Goal.maintain):
-        recipe = get_recipe(protein -5, protein+5, fat-3, fat+3, carbs-10, carbs+10, caloric_goal-100, caloric_goal+100)
+    if user_goal == Goal.cut:
+        meals = get_menu_items(max_protein=protein, max_fat=fat, max_carbs=carbs, max_calories=caloric_goal)
+    elif user_goal == Goal.maintain:
+        meals = get_menu_items(protein - 5, protein + 5, fat - 3, fat + 3, carbs - 10, carbs + 10, caloric_goal - 100,
+                               caloric_goal + 100)
     else:
-        recipe = get_recipe(minProtein=protein, minFat=fat, minCarbs=carbs, minCalories=caloric_goal)
+        meals = get_menu_items(min_protein=protein, min_fat=fat, min_carbs=carbs, min_calories=caloric_goal)
 
     print(protein, fat, carbs)
     del queue_cache[user_id]
@@ -86,7 +92,14 @@ def physical_activity_level(user_id):
         return 5
 
 
-def get_macros(calorie_goal, weight_in_kg, physical_acticvity):
+def get_macros(calorie_goal: float, weight_in_kg, physical_acticvity):
+    """
+    :param calorie_goal: the calorie goal of the user
+    :param weight_in_kg: the weight of the user in kilograms
+    :param physical_acticvity: the physical activity level of the user
+
+    :return: a tuple of the macros in grams
+    """
     calories_per_gram = {"fat": 9, "protein": 4, "carbs": 4}
     # the physical_activity_ratio is calculated with 0.8 grams of protein per kilo
 
@@ -100,7 +113,7 @@ def get_macros(calorie_goal, weight_in_kg, physical_acticvity):
         protein / calories_per_gram["protein"],
         fat / calories_per_gram["fat"],
         carbs / calories_per_gram["carbs"],
-    )  # returns the calories of protein, fat, and carbs
+    )
 
 
 def calc_calorie_intake_target(user_id: str):
@@ -140,16 +153,16 @@ def timed_calories_to_total(calories, start_time: datetime, end_time: datetime):
         if next_hour_start > end_time:  # if fractional hour, calculate fraction of hour
             fraction_of_hour = (end_time - current_time).seconds / 3600
             total += (
-                fraction_of_hour
-                * cumulative_calorie_expenditure_over_time[current_time.hour]
+                    fraction_of_hour
+                    * cumulative_calorie_expenditure_over_time[current_time.hour]
             )
             break
 
         # before next hour, calculate fraction of hour
         fraction_of_hour = (next_hour_start - current_time).seconds / 3600
         total += (
-            fraction_of_hour
-            * cumulative_calorie_expenditure_over_time[current_time.hour]
+                fraction_of_hour
+                * cumulative_calorie_expenditure_over_time[current_time.hour]
         )
 
         current_time = next_hour_start

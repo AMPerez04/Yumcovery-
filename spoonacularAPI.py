@@ -6,7 +6,10 @@ api_key = '9352cf695fe2426f89998c232f7fc973'  # privacy doesn't matter, this is 
 
 
 def get_menu_items(min_protein=None, max_protein=None, min_fat=None, max_fat=None, min_carbs=None, max_carbs=None,
-                   min_calories=None, max_calories=None):
+                   min_calories=None, max_calories=None) -> list[dict[str, str | list[dict]]]:
+    """
+    :return: a list of three meals that fit the macro requirements
+    """
     if ((min_protein is None and max_protein is None)
             or (min_fat is None and max_fat is None)
             or (min_carbs is None and max_carbs is None)
@@ -25,13 +28,13 @@ def get_menu_items(min_protein=None, max_protein=None, min_fat=None, max_fat=Non
         max_carbs = min_carbs * 1.4
         max_calories = min_calories * 1.4
 
-    num_meals = 1
+    num_meals = 3
     endpoint = 'https://api.spoonacular.com/recipes/complexSearch'
     offset = int(random.random() * 100)
     url = f'''
     {endpoint}?apiKey={api_key}&minCalories={min_calories}&maxProtein={max_protein}&minProtein={min_protein}
     &maxCarbs={max_carbs}&minCarbs={min_carbs}&maxFat={max_fat}&minFat={min_fat}&maxCalories={max_calories}
-    &intstructionsRequired=TRUE&offset={1}&number={num_meals}'''
+    &intstructionsRequired=TRUE&offset={offset}&number={num_meals}'''
 
     response = requests.get(url)
     if response.status_code == 200:
@@ -52,10 +55,15 @@ def get_menu_items(min_protein=None, max_protein=None, min_fat=None, max_fat=Non
             recipe_ingredients = ingredients.json()["ingredients"]
             recipe_instructions = instructions.json()
 
-        meals_list.append({
-            'name': meals['results'][0]['title'],
-            'ingredients': recipe_ingredients,
-            'instructions': recipe_instructions
-        })
+            meals_list.append({
+                'name': meals['results'][0]['title'],
+                'ingredients': recipe_ingredients,
+                'instructions': recipe_instructions
+            })
 
     return meals_list
+
+
+test = get_menu_items(min_protein=10, max_protein=200, min_fat=10, max_fat=200, min_carbs=10, max_carbs=200,
+                      min_calories=100, max_calories=2000)
+print(test)
